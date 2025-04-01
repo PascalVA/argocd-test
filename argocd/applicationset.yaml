@@ -1,0 +1,42 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/manifest-generate-paths: .
+  name: stack-tests
+  labels:
+    name: stack-tests
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - git:
+      repoURL: https://github.com/pascalva/argocd-test
+      revision: main
+      directories:
+      - path: '*'
+      - path: 'argocd'
+        exclude: true
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+      namespace: argocd
+      labels:
+        name: '{{.path.basename}}'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .
+    spec:
+      project: stack-tests
+      source:
+        repoURL: https://github.com/pascalva/argocd-test
+        targetRevision: main
+        path: '{{.path.basename}}/'
+      destination:
+        name: in-cluster
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: false
