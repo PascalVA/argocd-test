@@ -1,0 +1,19 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tests-stack01
+  namespace: argocd
+spec:
+  template:
+    spec:
+      containers:
+      - name: stack01-tests
+        image: alpine:latest
+        command:
+        - 'wget'
+        - '-O'
+        - '-'
+        - http://10.244.0.12/
+      restartPolicy: Never
+  backoffLimit: 1
